@@ -12,21 +12,6 @@ use mhndev\message\adapters\iAdapter;
 class Client implements iAdapter
 {
     /**
-     * @var string
-     */
-    protected $address;
-
-    /**
-     * @var array
-     */
-    protected $credentials;
-
-    /**
-     * @var array meta data
-     */
-    protected $meta;
-
-    /**
      * @var iAdapter
      */
     protected $adapter;
@@ -35,15 +20,27 @@ class Client implements iAdapter
     /**
      * Client constructor.
      *
-     * @param iAdapter $adapter
      * @param array $config
+     * @param iAdapter $adapter
+     * @throws \Exception
      */
-    public function __construct(iAdapter $adapter, $config = [])
+    public function __construct(array $config, iAdapter $adapter = null)
     {
+        if(empty($config) || !is_array($config)){
+            throw new \Exception('Invalid Argument');
+        }
+
         $provider = $config['default'];
         $config   = $config[$provider];
         $class    = $config['adapter'];
-        $this->adapter = new $class($config);
+
+
+        if(!$adapter){
+            $this->adapter = new $class($config);
+        }else{
+            $this->adapter = $adapter;
+        }
+
     }
 
     /**
@@ -59,11 +56,21 @@ class Client implements iAdapter
     }
 
 
+    /**
+     * @param $recipient
+     * @param $message
+     * @param string $sender
+     * @param array $options
+     * @return mixed
+     */
     public function send($recipient, $message, $sender = '', array $options = [])
     {
         return $this->adapter->send($recipient, $message, $sender, $options);
     }
 
+    /**
+     * @return mixed
+     */
     public function getSmsLines()
     {
         return $this->adapter->getSmsLines();

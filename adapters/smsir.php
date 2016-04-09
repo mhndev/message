@@ -295,7 +295,7 @@ class smsir implements iAdapter
      */
     public function SaveNewScheduleSendSms_Daily($dailyScheduleSend)
     {
-        $params= [
+        $params = [
             'userName'=>$this->credentials['username'],
             'password'=>$this->credentials['password'],
             'dailyScheduleSend'=>$dailyScheduleSend
@@ -308,7 +308,7 @@ class smsir implements iAdapter
 
     public function SaveNewScheduleSendSms_Monthly($monthlyScheduleSend)
     {
-        $params= [
+        $params = [
             'userName'=>$this->credentials['username'],
             'password'=>$this->credentials['password'],
             'monthlyScheduleSend'=>$monthlyScheduleSend
@@ -325,7 +325,7 @@ class smsir implements iAdapter
      */
     public function SaveNewScheduleSendSms_Weekly($weeklyScheduleSend)
     {
-        $params= [
+        $params = [
             'userName'=>$this->credentials['username'],
             'password'=>$this->credentials['password'],
             'weeklyScheduleSend'=>$weeklyScheduleSend
@@ -391,8 +391,20 @@ class smsir implements iAdapter
      * @param $isFlash
      * @return mixed
      */
-    public function SendToParish($line , $sendCount , $sendMethodId , $startAt , $fromNumber , $toNumber , $filterId ,
-                                 $filterValue , $messageBody , $parishId , $sendSince , $isFlash)
+    public function SendToParish(
+        $line,
+        $sendCount,
+        $sendMethodId,
+        $startAt,
+        $fromNumber,
+        $toNumber,
+        $filterId,
+        $filterValue,
+        $messageBody,
+        $parishId,
+        $sendSince,
+        $isFlash
+    )
     {
         $params= [
             'userName'=>$this->credentials['username'],
