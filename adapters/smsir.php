@@ -7,85 +7,74 @@
  */
 namespace mhndev\message\adapters;
 
+use SoapClient;
+
 class smsir implements iAdapter
 {
     /**
-     * @var
+     * @var string
      */
     protected $address;
-    /**
-     * @var
-     */
-    protected $username;
-    /**
-     * @var
-     */
-    protected $password;
 
     /**
-     * @var iAdapter
+     * @var array
      */
-    protected $adapter;
+    protected $credentials;
 
     /**
-     * @var
+     * @var array meta data
      */
-    protected $config;
+    protected $meta;
 
     /**
-     * @var
+     * @var SoapClient
      */
     protected $client;
 
 
-
-    public function __construct(array $params = [])
+    /**
+     * smsir constructor.
+     * @param array $config
+     */
+    public function __construct(array $config = [])
     {
-        $config = config('sms');
+        $this->address     = $config['address'];
+        $this->credentials = $config['credentials'];
+        $this->meta        = $config['meta'];
 
-        $provider = $config['sms_ir'];
-
-        if(empty($params))
-            $params = $config['sms_ir'];
-
-        $this->config = $config['sms_ir'];
-
-
-
-        $this->client = new SoapClient($this->config['address']);
-
-
-        $this->address  = array_key_exists('address',$params) ? $params['address'] : $this->config['address'];
-        $this->username = array_key_exists('username',$params) ? $params['username'] : $this->config['username'];
-        $this->password = array_key_exists('password',$params) ? $params['password'] : $this->config['password'];
+        $this->client = new SoapClient($this->address);
     }
 
 
-
-    public function handleErrors($method , $errorCode)
-    {
-        foreach($this->config['methods'][$method]['errors']['reference']['message'] as $key => $value ){
-            if($key == $errorCode){
-                Log::error($value);
-            }
-        }
-    }
-
-
-
+    /**
+     * @return mixed
+     */
     public function getSmsLines()
     {
-        $params= array("userName"=>$this->username,"password"=>$this->password);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password']
+        ];
+
         return $this->client->GetSmsLines($params);
     }
 
+    /**
+     * @param $recipient
+     * @param $message
+     * @param string $sender
+     * @param array $options
+     * @return mixed
+     */
     public function send($recipient, $message, $sender = '', array $options = [])
     {
-        $parameters['userName'] = $this->username;
-        $parameters['password'] = $this->password;
-        $parameters['mobileNos'] = array(doubleval($recipient));
-        $parameters['messages'] = array($message);
-        $parameters['lineNumber'] = $sender ? $sender : $this->config['line'];
+        $parameters = [];
+        $parameters['userName'] = $this->credentials['username'];
+        $parameters['password'] = $this->credentials['password'];
+
+        $parameters['mobileNos']    = array(doubleval($recipient));
+        $parameters['messages']     = array($message);
+        $parameters['lineNumber']   = $sender ? $sender : $this->meta['baseLine'];
         $parameters['sendDateTime'] = date("Y-m-d")."T".date("H:i:s");
 
         $result = $this->client->SendMessageWithLineNumber($parameters);
@@ -93,33 +82,53 @@ class smsir implements iAdapter
         return $result;
     }
 
-    public function DeleteSchedulSendSms($id)
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function DeleteScheduleSendSms($id)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password,'schedulSendSmsID'=>$id);
-        $result = $this->client->DeleteSchedulSendSms($params);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'schedulSendSmsID'=>$id
+        ];
+
+        $result = $this->client->DeleteScheduleSendSms($params);
 
         return $result;
     }
 
 
     /**
-     * @param $from  sample : 2014-05-18T11:47:25
-     * @param $to    sample : 2014-06-18T11:47:25
+     * @param string $from  sample : 2014-05-18T11:47:25
+     * @param string $to    sample : 2014-06-18T11:47:25
      */
     public function GetAllMessages($from , $to)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password,'fromDate'=>$from,'toDate'=>$to);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'fromDate'=>$from,
+            'toDate'=>$to
+        ];
+
         $result = $this->client->GetAllMessages($params);
 
         return $result;
     }
 
     /**
-     * @param $id
+     * @param integer $id
      */
     public function GetBranches($id)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password,'parentBranchID'=>$id);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'parentBranchID'=>$id
+        ];
+
         $result = $this->client->GetBranches($params);
 
         return $result;
@@ -137,7 +146,7 @@ class smsir implements iAdapter
     /**
      *
      */
-    public function GetDefualtLineNumber()
+    public function GetDefaultLineNumber()
     {
 
     }
@@ -147,7 +156,11 @@ class smsir implements iAdapter
      */
     public function GetListOfScheduleSends()
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password']
+        ];
+
         $result = $this->client->GetListOfScheduleSends($params);
 
         return $result;
@@ -168,7 +181,12 @@ class smsir implements iAdapter
      */
     public function GetReceivedMessages($from , $to)
     {
-        $Params= array('userName'=>$this->username,'password'=>$this->password,'fromDate'=>$from,'toDate'=>$to);
+        $Params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'fromDate'=>$from,
+            'toDate'=>$to
+        ];
         $result = $this->client->GetReceivedMessages($Params);
 
         return $result;
@@ -179,7 +197,10 @@ class smsir implements iAdapter
      */
     public function GetSendToBranchFilterConditions()
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password']
+        ];
         $result = $this->client->GetSendToBranchFilterConditions($params);
 
         return $result;
@@ -190,17 +211,35 @@ class smsir implements iAdapter
      */
     public function GetSendToBranchesSendMethods()
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password']
+        ];
         $result =$this->client->GetSendToBranchesSendMethods($params);
 
         return $result;
     }
 
+    /**
+     * @param $batchKey
+     * @param $requestPageNumber
+     * @param $rowsPerPage
+     * @param $countAll
+     * @param $sendDate
+     * @return mixed
+     */
     public function GetSentMessageStatus($batchKey , $requestPageNumber , $rowsPerPage , $countAll , $sendDate)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password, 'batchKey'=>$batchKey,
-            'requestedPageNumber'=>$requestPageNumber,'rowsPerPage'=>$rowsPerPage,'countOfAll'=>$countAll,
-            'sendDateTime'=>$sendDate);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'batchKey'=>$batchKey,
+            'requestedPageNumber'=>$requestPageNumber,
+            'rowsPerPage'=>$rowsPerPage,
+            'countOfAll'=>$countAll,
+            'sendDateTime'=>$sendDate
+        ];
+
         $result = $this->client->GetSentMessageStatus($params);
 
         return $result;
@@ -212,24 +251,35 @@ class smsir implements iAdapter
     }
 
     /**
-     * @param $from sample : 2014-04-18T11:47:25
-     * @param $to   sample : 2014-07-20T11:47:25
+     * @param string $from sample : 2014-04-18T11:47:25
+     * @param string $to   sample : 2014-07-20T11:47:25
      */
     public function GetSentMessages($from , $to)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password,'fromDate'=>$from,'toDate'=>$to);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'fromDate'=>$from,
+            'toDate'=>$to
+        ];
         $result = $this->client->GetSentMessages($params);
 
         return $result;
     }
 
     /**
-     * @param $from sample : 2014-04-18T11:47:25
-     * @param $to   sample : 2014-07-20T11:47:25
+     * @param string $from sample : 2014-04-18T11:47:25
+     * @param string $to   sample : 2014-07-20T11:47:25
      */
     public function GetTrashedMessages($from , $to)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password,'fromDate'=>$from,'toDate'=>$to);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'fromDate'=>$from,
+            'toDate'=>$to
+        ];
+
         $result = $this->client->GetTrashedMessages($params);
 
         return $result;
@@ -243,27 +293,45 @@ class smsir implements iAdapter
     /**
      * @param $dailyScheduleSend
      */
-    public function SaveNewSchedulSendSms_Daily($dailyScheduleSend)
+    public function SaveNewScheduleSendSms_Daily($dailyScheduleSend)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password,'dailyScheduleSend'=>$dailyScheduleSend);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'dailyScheduleSend'=>$dailyScheduleSend
+        ];
+
         $result = $this->client->SaveNewSchedulSendSms_Daily($params);
 
         return $result;
     }
 
-    public function SaveNewSchedulSendSms_Monthly($monthlyScheduleSend)
+    public function SaveNewScheduleSendSms_Monthly($monthlyScheduleSend)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password,
-            'monthlyScheduleSend'=>$monthlyScheduleSend);
-        $result = $this->client->SaveNewSchedulSendSms_Monthly($params);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'monthlyScheduleSend'=>$monthlyScheduleSend
+        ];
+
+        $result = $this->client->SaveNewScheduleSendSms_Monthly($params);
 
         return $result;
     }
 
-    public function SaveNewSchedulSendSms_Weekly($weeklyScheduleSend)
+    /**
+     * @param $weeklyScheduleSend
+     * @return mixed
+     */
+    public function SaveNewScheduleSendSms_Weekly($weeklyScheduleSend)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password,'weeklyScheduleSend'=>$weeklyScheduleSend);
-        $result =  $this->client->SaveNewSchedulSendSms_Weekly($params);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'weeklyScheduleSend'=>$weeklyScheduleSend
+        ];
+
+        $result =  $this->client->SaveNewScheduleSendSms_Weekly($params);
 
         return $result;
     }
@@ -308,13 +376,41 @@ class smsir implements iAdapter
 
     }
 
+    /**
+     * @param $line
+     * @param $sendCount
+     * @param $sendMethodId
+     * @param $startAt
+     * @param $fromNumber
+     * @param $toNumber
+     * @param $filterId
+     * @param $filterValue
+     * @param $messageBody
+     * @param $parishId
+     * @param $sendSince
+     * @param $isFlash
+     * @return mixed
+     */
     public function SendToParish($line , $sendCount , $sendMethodId , $startAt , $fromNumber , $toNumber , $filterId ,
                                  $filterValue , $messageBody , $parishId , $sendSince , $isFlash)
     {
-        $params= array('userName'=>$this->username,'password'=>$this->password,'smsLineID'=>$line,
-            'sendCount'=>$sendCount,'sendMethodID'=>$sendMethodId,'startAt'=>$startAt,'fromNumber'=>$fromNumber,
-            'toNumber'=>$toNumber,'filterID'=>$filterId,'filterValue'=>$filterValue,'messageBody'=>$messageBody,
-            'parishID'=>$parishId,'sendSince'=>$sendSince,'isFlash'=>$isFlash);
+        $params= [
+            'userName'=>$this->credentials['username'],
+            'password'=>$this->credentials['password'],
+            'smsLineID'=>$line,
+            'sendCount'=>$sendCount,
+            'sendMethodID'=>$sendMethodId,
+            'startAt'=>$startAt,
+            'fromNumber'=>$fromNumber,
+            'toNumber'=>$toNumber,
+            'filterID'=>$filterId,
+            'filterValue'=>$filterValue,
+            'messageBody'=>$messageBody,
+            'parishID'=>$parishId,
+            'sendSince'=>$sendSince,
+            'isFlash'=>$isFlash
+        ];
+
         $result =  $this->client->SendToParish($params);
 
         return $result;
