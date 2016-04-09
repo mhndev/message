@@ -31,7 +31,7 @@ class Client implements iAdapter
         }
 
         $provider = $config['default'];
-        $config   = $config[$provider];
+        $config   = $config['providers'][$provider];
         $class    = $config['adapter'];
 
 
