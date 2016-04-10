@@ -11,7 +11,7 @@ you can also you this composer command :
 composer require mhndev/message dev-master
 ```
 
-###sample usage
+###Sample usage
 
 ```php
 
@@ -45,8 +45,7 @@ $client->send('09395410440', 'salam');
 consider that for creating client object you should pass an configuration array as above.
 you can store your configuration file in your application and pass it to client object.
 
-###
-Adapters
+###Adapters
 
 each adapter is related to a specific message service.
 you can have multiple service providers and specify default service in you config file.
