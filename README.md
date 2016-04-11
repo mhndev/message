@@ -79,9 +79,9 @@ so if you don't pass adapter object as an argument for client constructor it wou
 
 even you can create your own provider class and extend the configuration file for your class.
 
-for now this package support following sms senders :
-[sms.ir](http://www.sms.ir/)
-[magfa](https://messaging.magfa.com/ui/)
+for now this package support following sms senders :<br />
+[sms.ir](http://www.sms.ir/)<br />
+[magfa](https://messaging.magfa.com/ui/)<br />
 
 #Adapters
 each provider can have multiple adapter .
