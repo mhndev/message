@@ -5,7 +5,7 @@
  * Date: 4/9/16
  * Time: 4:05 PM
  */
-namespace mhndev\message\adapters;
+namespace mhndev\message\providers;
 
 interface iAdapter
 {

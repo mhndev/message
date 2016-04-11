@@ -5,11 +5,12 @@
  * Date: 4/9/16
  * Time: 4:05 PM
  */
-namespace mhndev\message\adapters;
+namespace mhndev\message\providers\smsir\adapters;
 
+use mhndev\message\providers\iAdapter;
 use SoapClient;
 
-class smsir implements iAdapter
+class SoapAdapter implements iAdapter
 {
     /**
      * @var string

@@ -7,7 +7,7 @@
  */
 namespace mhndev\message;
 
-use mhndev\message\adapters\iAdapter;
+use mhndev\message\providers\iAdapter;
 
 class Client implements iAdapter
 {
